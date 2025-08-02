@@ -18,6 +18,30 @@ const CategoriesPage = () => {
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     setCategoryError(null);
+interface Category {
+  id: string;
+  name: string;
+  monthly_limit: number | null;
+}
+
+const CategoriesPage = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryLimit, setNewCategoryLimit] = useState('');
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user.id) {
+        const { data, error } = await supabase.from('categories').select('*').eq('user_id', user.id);
+        if (data) setCategories(data);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const handleAddCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (newCategoryName && user.id) {
       const { data, error } = await supabase
@@ -27,6 +51,7 @@ const CategoriesPage = () => {
       if (error) {
         setCategoryError('Failed to create category. Please try again.');
       } else if (data) {
+      if (data) {
         setCategories([...categories, data[0]]);
         setNewCategoryName('');
         setNewCategoryLimit('');

@@ -1,40 +1,21 @@
 'use client';
-
-import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import withAuth from '@/components/withAuth';
-import { useSupabase } from '@/hooks/useSupabase';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const AccountsPage = () => {
-  const { data: accounts, setData: setAccounts, loading, error } = useSupabase('accounts');
-  const [newAccountName, setNewAccountName] = useState('');
-  const [newAccountType, setNewAccountType] = useState<'bancaria' | 'investimento'>('bancaria');
-  const [accountError, setAccountError] = useState<string | null>(null);
-
-  const handleAddAccount = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAccountError(null);
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (newAccountName && user.id) {
       const { data, error } = await supabase
         .from('accounts')
         .insert([{ name: newAccountName, type: newAccountType, user_id: user.id }])
         .select();
-      if (error) {
-        setAccountError('Failed to create account. Please try again.');
-      } else if (data) {
+      if (data) {
         setAccounts([...accounts, data[0]]);
         setNewAccountName('');
       }
     }
   };
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error loading accounts.</p>;
 
   return (
     <div>
@@ -44,11 +25,6 @@ const AccountsPage = () => {
           <CardHeader>
             <CardTitle>Add New Account</CardTitle>
           </CardHeader>
-          {accountError && (
-            <div style={{ color: 'red', padding: '1rem' }}>
-              {accountError}
-            </div>
-          )}
           <CardContent>
             <form onSubmit={handleAddAccount}>
               <div className="grid gap-4">
