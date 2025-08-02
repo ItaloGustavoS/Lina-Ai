@@ -3,8 +3,8 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-const withAuth = (WrappedComponent: React.ComponentType) => {
-  const Wrapper = (props: any) => {
+const withAuth = <P extends object>(WrappedComponent: React.ComponentType<P>) => {
+  const Wrapper = (props: P) => {
     const router = useRouter();
 
     useEffect(() => {

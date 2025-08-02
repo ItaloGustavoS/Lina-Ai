@@ -10,12 +10,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
+interface Account {
+  id: string;
+  name: string;
+  type: 'bancaria' | 'investimento';
+  user_id: string;
+}
+
 const AccountsPage = () => {
-  const { data: accounts, setData: setAccounts, loading, error } = useSupabase('accounts');
+  const { data: accounts, setData: setAccounts, loading, error } = useSupabase<Account>('accounts');
   const [newAccountName, setNewAccountName] = useState('');
   const [newAccountType, setNewAccountType] = useState<'bancaria' | 'investimento'>('bancaria');
   const [accountError, setAccountError] = useState<string | null>(null);
-  const [editingAccount, setEditingAccount] = useState<any>(null);
+  const [editingAccount, setEditingAccount] = useState<Account | null>(null);
 
   const handleAddAccount = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +38,6 @@ const AccountsPage = () => {
       if (error) {
         setAccountError('Failed to create account. Please try again.');
       } else if (data) {
-      if (data) {
         setAccounts([...accounts, data[0]]);
         setNewAccountName('');
       }
@@ -135,7 +141,11 @@ const AccountsPage = () => {
                               <Input
                                 id="name"
                                 value={editingAccount?.name || ''}
-                                onChange={(e) => setEditingAccount({ ...editingAccount, name: e.target.value })}
+                                onChange={(e) => {
+                                  if (editingAccount) {
+                                    setEditingAccount({ ...editingAccount, name: e.target.value })
+                                  }
+                                }}
                                 className="col-span-3"
                               />
                             </div>
@@ -146,7 +156,11 @@ const AccountsPage = () => {
                               <select
                                 id="type"
                                 value={editingAccount?.type || 'bancaria'}
-                                onChange={(e) => setEditingAccount({ ...editingAccount, type: e.target.value })}
+                                onChange={(e) => {
+                                  if (editingAccount) {
+                                    setEditingAccount({ ...editingAccount, type: e.target.value as 'bancaria' | 'investimento' })
+                                  }
+                                }}
                                 className="col-span-3 w-full p-2 border rounded"
                               >
                                 <option value="bancaria">Bancária</option>

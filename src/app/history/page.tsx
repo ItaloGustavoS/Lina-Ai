@@ -5,11 +5,6 @@ import withAuth from '@/components/withAuth';
 import { useSupabase } from '@/hooks/useSupabase';
 import { supabase } from '@/lib/supabase';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { supabase } from '@/lib/supabase';
-import withAuth from '@/components/withAuth';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from '@/components/ui/button';
 
@@ -24,47 +19,14 @@ interface Transaction {
 }
 
 const HistoryPage = () => {
-  const { data: transactions, setData: setTransactions, loading, error } = useSupabase('transactions');
-  const { data: transactions, loading, error } = useSupabase('transactions');
-  const { data: accounts } = useSupabase('accounts');
-  const { data: categories } = useSupabase('categories');
+  const { data: transactions, setData: setTransactions, loading, error } = useSupabase<Transaction>('transactions');
+  const { data: accounts } = useSupabase<{id: string, name: string}>('accounts');
+  const { data: categories } = useSupabase<{id: string, name: string}>('categories');
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [filters, setFilters] = useState({ type: '', accountId: '', categoryId: '' });
 
   useEffect(() => {
     let filtered = transactions as Transaction[];
-
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
-  const [accounts, setAccounts] = useState<{ id: string, name: string }[]>([]);
-  const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
-  const [filters, setFilters] = useState({ type: '', accountId: '', categoryId: '' });
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (user.id) {
-        const { data: transactionsData } = await supabase
-          .from('transactions')
-          .select('*, account:accounts(name), category:categories(name)')
-          .eq('user_id', user.id);
-        if (transactionsData) {
-          setTransactions(transactionsData as any);
-          setFilteredTransactions(transactionsData as any);
-        }
-
-        const { data: accountsData } = await supabase.from('accounts').select('id, name').eq('user_id', user.id);
-        if (accountsData) setAccounts(accountsData);
-
-        const { data: categoriesData } = await supabase.from('categories').select('id, name').eq('user_id', user.id);
-        if (categoriesData) setCategories(categoriesData);
-      }
-    };
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    let filtered = transactions;
     if (filters.type) {
       filtered = filtered.filter(t => t.type === filters.type);
     }

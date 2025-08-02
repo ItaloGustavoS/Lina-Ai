@@ -35,7 +35,7 @@ const DashboardPage = () => {
           .eq('user_id', user.id)
           .gte('date', `${year}-${month.toString().padStart(2, '0')}-01`)
           .lte('date', `${year}-${month.toString().padStart(2, '0')}-${new Date(year, month, 0).getDate()}`);
-        if (data) setTransactions(data as any);
+        if (data) setTransactions(data);
       }
     };
     fetchTransactions();
@@ -131,11 +131,6 @@ const DashboardPage = () => {
               }
             }}
           />
-          <Input type="number" value={month} onChange={e => setMonth(parseInt(e.target.value))} />
-        </div>
-        <div>
-          <label>Year:</label>
-          <Input type="number" value={year} onChange={e => setYear(parseInt(e.target.value))} />
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

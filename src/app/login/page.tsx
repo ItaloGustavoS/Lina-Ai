@@ -3,97 +3,121 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const LoginPage = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [loginError, setLoginError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoginError(null);
-    if (name && email) {
-      // In a real app, you'd want to handle errors
-      const { data, error } = await supabase.from('users').insert([{ name, email }]).select();
-      if (data) {
-        localStorage.setItem('user', JSON.stringify({ id: data[0].id, name: data[0].name, email }));
-        router.push('/');
-        return;
+    setError(null);
+    setIsLoading(true);
+
+    if (!name || !email) {
+      setError('Please enter both name and email.');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // Check if user with email already exists
+      const { data: existingUser, error: selectError } = await supabase
+        .from('users')
+        .select('id, name')
+        .eq('email', email)
+        .single();
+
+      if (selectError && selectError.code !== 'PGRST116') { // PGRST116 = no rows found
+        throw new Error(selectError.message);
       }
 
-      if (error) {
-        // Handle unique constraint violation
-        if (error.code === '23505') {
-          const { data: userData, error: userError } = await supabase.from('users').select('id, name').eq('email', email).single();
-          if (userData) {
-            localStorage.setItem('user', JSON.stringify({ id: userData.id, name: userData.name, email }));
-            router.push('/');
-            return;
-          } else if (userError) {
-            setLoginError('An error occurred while retrieving your user information. Please try again.');
-          } else {
-            setLoginError('User already exists, but could not retrieve user information.');
-          }
-        } else {
-          setLoginError('Login failed: ' + (error.message || 'Unknown error.'));
+      if (existingUser) {
+        // User exists, log them in
+        localStorage.setItem('user', JSON.stringify({ id: existingUser.id, name: existingUser.name, email }));
+        router.push('/dashboard');
+      } else {
+        // User does not exist, create a new user
+        const { data: newUser, error: insertError } = await supabase
+          .from('users')
+          .insert([{ name, email }])
+          .select('id, name')
+          .single();
+
+        if (insertError) {
+          throw new Error(insertError.message);
+        }
+
+        if (newUser) {
+          localStorage.setItem('user', JSON.stringify({ id: newUser.id, name: newUser.name, email }));
+          router.push('/dashboard');
         }
       }
-    } else {
-      setLoginError('Please enter both name and email.');
-    }
-  }
-        localStorage.setItem('user', JSON.stringify({ id: data[0].id, name, email }));
-        router.push('/');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred. Please try again.');
       }
-      if (error) {
-        // Handle unique constraint violation
-        if (error.code === '23505') {
-          const { data: userData, error: userError } = await supabase.from('users').select('id').eq('email', email).single();
-          if (userData) {
-            localStorage.setItem('user', JSON.stringify({ id: userData.id, name, email }));
-            router.push('/');
-          }
-        }
-      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <form onSubmit={handleLogin} className="bg-gray-800 p-8 rounded-lg shadow-md w-96">
-        <h2 className="text-2xl font-bold mb-4 text-white">Login</h2>
-        {loginError && (
-          <div style={{ color: 'red', marginBottom: '1rem' }}>
-            {loginError}
-          </div>
-        )}
-        <div className="mb-4">
-          <label htmlFor="name" className="block text-sm font-medium text-gray-300">Name</label>
-          <input
-            type="text"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-300">Email</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            required
-          />
-        </div>
-        <button type="submit" className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700">
-          Login
-        </button>
-      </form>
+    <div className="flex items-center justify-center min-h-screen bg-gray-900">
+      <Card className="w-full max-w-md bg-gray-800 border-gray-700">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-white">Welcome to Lina AI</CardTitle>
+          <CardDescription className="text-gray-400">
+            Enter your details to log in or create an account.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleLogin} className="space-y-4">
+            {error && (
+              <div className="p-3 bg-red-500/20 text-red-400 rounded-md">
+                {error}
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-gray-300">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="John Doe"
+                required
+                className="bg-gray-700 border-gray-600 text-white"
+                disabled={isLoading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-gray-300">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="john.doe@example.com"
+                required
+                className="bg-gray-700 border-gray-600 text-white"
+                disabled={isLoading}
+              />
+            </div>
+            <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700" disabled={isLoading}>
+              {isLoading ? 'Processing...' : 'Login / Sign Up'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 };
