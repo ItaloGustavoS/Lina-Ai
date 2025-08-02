@@ -4,6 +4,9 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import withAuth from '@/components/withAuth';
 import { useSupabase } from '@/hooks/useSupabase';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import withAuth from '@/components/withAuth';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +16,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 const TransactionsPage = () => {
   const { data: accounts } = useSupabase('accounts');
   const { data: categories } = useSupabase('categories');
+
+interface Account {
+  id: string;
+  name: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
+}
+
+const TransactionsPage = () => {
   const [type, setType] = useState('gasto');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
@@ -24,6 +39,26 @@ const TransactionsPage = () => {
   const handleAddTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
     setTransactionError(null);
+
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user.id) {
+        const { data: accountsData } = await supabase.from('accounts').select('id, name').eq('user_id', user.id);
+        if (accountsData) setAccounts(accountsData);
+        const { data: categoriesData } = await supabase.from('categories').select('id, name').eq('user_id', user.id);
+        if (categoriesData) setCategories(categoriesData);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleAddTransaction = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (amount && date && accountId && categoryId && user.id) {
       const { data, error } = await supabase
@@ -41,6 +76,8 @@ const TransactionsPage = () => {
       if (error) {
         setTransactionError('Failed to add transaction. Please try again.');
       } else if (data) {
+
+      if (data) {
         // Reset form
         setType('gasto');
         setAmount('');

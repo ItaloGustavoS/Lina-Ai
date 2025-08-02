@@ -131,6 +131,11 @@ const DashboardPage = () => {
               }
             }}
           />
+          <Input type="number" value={month} onChange={e => setMonth(parseInt(e.target.value))} />
+        </div>
+        <div>
+          <label>Year:</label>
+          <Input type="number" value={year} onChange={e => setYear(parseInt(e.target.value))} />
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

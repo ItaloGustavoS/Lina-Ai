@@ -31,6 +31,19 @@ const Sidebar = () => {
             <Link href="/history">
               <a className="block p-2 rounded hover:bg-gray-700">History</a>
             </Link>
+            <a href="#" className="block p-2 rounded hover:bg-gray-700">Dashboard</a>
+          </li>
+          <li className="mb-2">
+            <a href="#" className="block p-2 rounded hover:bg-gray-700">Transactions</a>
+          </li>
+          <li className="mb-2">
+            <a href="#" className="block p-2 rounded hover:bg-gray-700">Accounts</a>
+          </li>
+          <li className="mb-2">
+            <a href="#" className="block p-2 rounded hover:bg-gray-700">Categories</a>
+          </li>
+          <li className="mb-2">
+            <a href="#" className="block p-2 rounded hover:bg-gray-700">Goals</a>
           </li>
         </ul>
       </nav>

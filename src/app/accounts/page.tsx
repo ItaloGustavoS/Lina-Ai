@@ -20,15 +20,18 @@ const AccountsPage = () => {
   const handleAddAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     setAccountError(null);
+
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (newAccountName && user.id) {
       const { data, error } = await supabase
         .from('accounts')
         .insert([{ name: newAccountName, type: newAccountType, user_id: user.id }])
         .select();
+
       if (error) {
         setAccountError('Failed to create account. Please try again.');
       } else if (data) {
+      if (data) {
         setAccounts([...accounts, data[0]]);
         setNewAccountName('');
       }
@@ -109,6 +112,7 @@ const AccountsPage = () => {
             <ul>
               {accounts.map((account) => (
                 <li key={account.id} className="flex justify-between items-center p-2 border-b">
+
                   <div>
                     <span>{account.name}</span>
                     <span className="text-sm text-gray-500 ml-2">{account.type}</span>
@@ -156,6 +160,8 @@ const AccountsPage = () => {
                     </Dialog>
                     <Button variant="destructive" size="sm" onClick={() => handleDeleteAccount(account.id)}>Delete</Button>
                   </div>
+                  <span>{account.name}</span>
+                  <span className="text-sm text-gray-500">{account.type}</span>
                 </li>
               ))}
             </ul>

@@ -20,6 +20,31 @@ const CategoriesPage = () => {
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     setCategoryError(null);
+
+interface Category {
+  id: string;
+  name: string;
+  monthly_limit: number | null;
+}
+
+const CategoriesPage = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryLimit, setNewCategoryLimit] = useState('');
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user.id) {
+        const { data, error } = await supabase.from('categories').select('*').eq('user_id', user.id);
+        if (data) setCategories(data);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const handleAddCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (newCategoryName && user.id) {
       const { data, error } = await supabase
@@ -29,6 +54,7 @@ const CategoriesPage = () => {
       if (error) {
         setCategoryError('Failed to create category. Please try again.');
       } else if (data) {
+      if (data) {
         setCategories([...categories, data[0]]);
         setNewCategoryName('');
         setNewCategoryLimit('');
@@ -102,6 +128,7 @@ const CategoriesPage = () => {
             <ul>
               {categories.map((category) => (
                 <li key={category.id} className="flex justify-between items-center p-2 border-b">
+
                   <div>
                     <span>{category.name}</span>
                     <span className="text-sm text-gray-500 ml-2">
@@ -149,6 +176,10 @@ const CategoriesPage = () => {
                     </Dialog>
                     <Button variant="destructive" size="sm" onClick={() => handleDeleteCategory(category.id)}>Delete</Button>
                   </div>
+                  <span>{category.name}</span>
+                  <span className="text-sm text-gray-500">
+                    {category.monthly_limit ? `$${category.monthly_limit}` : 'No limit'}
+                  </span>
                 </li>
               ))}
             </ul>

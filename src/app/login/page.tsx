@@ -43,6 +43,21 @@ const LoginPage = () => {
       setLoginError('Please enter both name and email.');
     }
   }
+        localStorage.setItem('user', JSON.stringify({ id: data[0].id, name, email }));
+        router.push('/');
+      }
+      if (error) {
+        // Handle unique constraint violation
+        if (error.code === '23505') {
+          const { data: userData, error: userError } = await supabase.from('users').select('id').eq('email', email).single();
+          if (userData) {
+            localStorage.setItem('user', JSON.stringify({ id: userData.id, name, email }));
+            router.push('/');
+          }
+        }
+      }
+    }
+  };
 
   return (
     <div className="flex items-center justify-center h-screen">
