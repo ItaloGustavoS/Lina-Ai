@@ -3,26 +3,32 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import withAuth from '@/components/withAuth';
+import withPageTransitions from '@/components/withPageTransitions';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
-
-interface Transaction {
-  type: 'ganho' | 'gasto' | 'investimento';
-  amount: number;
-  category: { name: string };
-  date: string;
-}
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useSupabase } from '@/hooks/useSupabase';
+import { Transaction, Category } from '@/lib/types';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
+const analysisPrompts = [
+  "Analyze my spending for this month and give me some tips on how to save money.",
+  "Identify any recurring subscriptions I might have.",
+  "Forecast my spending for the next month based on my history.",
+];
+
 const DashboardPage = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const { data: transactions, setTransactions } = useSupabase<Transaction>('transactions');
+  const { data: categories } = useSupabase<Category>('categories');
+  const [upcomingBills, setUpcomingBills] = useState<Transaction[]>([]);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
   const [analysis, setAnalysis] = useState('');
+  const [selectedPrompt, setSelectedPrompt] = useState(analysisPrompts[0]);
   const [loadingAnalysis, setLoadingAnalysis] = useState(false);
 
   useEffect(() => {
@@ -32,21 +38,36 @@ const DashboardPage = () => {
         const { data, error } = await supabase
           .from('transactions')
           .select('*, category:categories(name)')
-          .eq('user_id', user.id)
-          .gte('date', `${year}-${month.toString().padStart(2, '0')}-01`)
-          .lte('date', `${year}-${month.toString().padStart(2, '0')}-${new Date(year, month, 0).getDate()}`);
-        if (data) setTransactions(data);
+          .eq('user_id', user.id);
+
+        if (data) {
+          setTransactions(data);
+
+          const today = new Date();
+          const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+          const upcoming = data.filter(t => {
+            if (!t.due_date) return false;
+            const dueDate = new Date(t.due_date);
+            return dueDate >= today && dueDate <= nextWeek;
+          });
+          setUpcomingBills(upcoming);
+        }
       }
     };
     fetchTransactions();
-  }, [month, year]);
+  }, []);
 
   const handleAnalyze = async () => {
     setLoadingAnalysis(true);
     const res = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transactions }),
+      body: JSON.stringify({
+        transactions,
+        categories,
+        prompt: selectedPrompt,
+      }),
     });
     const data = await res.json();
     setAnalysis(data.analysis);
@@ -83,13 +104,24 @@ const DashboardPage = () => {
     <div>
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button onClick={handleAnalyze} disabled={loadingAnalysis}>
-              {loadingAnalysis ? 'Analyzing...' : 'Analyze Finances'}
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
+        <div className="flex gap-2">
+          <Select onValueChange={setSelectedPrompt} defaultValue={selectedPrompt}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select analysis type" />
+            </SelectTrigger>
+            <SelectContent>
+              {analysisPrompts.map(prompt => (
+                <SelectItem key={prompt} value={prompt}>{prompt}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button onClick={handleAnalyze} disabled={loadingAnalysis}>
+                {loadingAnalysis ? 'Analyzing...' : 'Analyze Finances'}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
             <DialogHeader>
               <DialogTitle>Financial Analysis</DialogTitle>
             </DialogHeader>
@@ -168,9 +200,24 @@ const DashboardPage = () => {
             </ResponsiveContainer>
           </CardContent>
         </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Upcoming Bills</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul>
+              {upcomingBills.map(bill => (
+                <li key={bill.id} className="flex justify-between items-center p-2 border-b">
+                  <span>{bill.description}</span>
+                  <span>{new Date(bill.due_date).toLocaleDateString()}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
 };
 
-export default withAuth(DashboardPage);
+export default withAuth(withPageTransitions(DashboardPage));
