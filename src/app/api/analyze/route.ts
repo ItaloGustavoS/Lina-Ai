@@ -11,29 +11,33 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // Validate that 'transactions' is present and is an array
     if (
       !body ||
       !('transactions' in body) ||
-      !Array.isArray(body.transactions)
+      !Array.isArray(body.transactions) ||
+      !('categories' in body) ||
+      !Array.isArray(body.categories) ||
+      !('prompt' in body) ||
+      typeof body.prompt !== 'string'
     ) {
       return NextResponse.json(
-        { error: "'transactions' is required and must be an array." },
+        { error: "Invalid request body. 'transactions', 'categories', and 'prompt' are required." },
         { status: 400 }
       );
     }
 
-    const { transactions } = body;
+    const { transactions, categories, prompt } = body;
 
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-    const prompt = `
-      Analyze the following financial transactions and provide a summary of the user's financial health.
-      The user wants to know their spending habits, get suggestions for saving money, and a general score of their financial health.
+    const fullPrompt = `
+      ${prompt}
+      Here is the user's financial data:
       Transactions: ${JSON.stringify(transactions)}
+      Categories: ${JSON.stringify(categories)}
     `;
 
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     const text = response.text();
 

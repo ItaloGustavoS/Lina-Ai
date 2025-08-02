@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import withAuth from '@/components/withAuth';
+import withPageTransitions from '@/components/withPageTransitions';
 import { useSupabase } from '@/hooks/useSupabase';
 import { supabase } from '@/lib/supabase';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -143,4 +144,4 @@ const HistoryPage = () => {
   );
 };
 
-export default withAuth(HistoryPage);
+export default withAuth(withPageTransitions(HistoryPage));
