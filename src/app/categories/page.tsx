@@ -1,13 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import withAuth from '@/components/withAuth';
+import { useSupabase } from '@/hooks/useSupabase';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const CategoriesPage = () => {
+  const { data: categories, setData: setCategories, loading, error } = useSupabase('categories');
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryLimit, setNewCategoryLimit] = useState('');
+  const [categoryError, setCategoryError] = useState<string | null>(null);
+
+  const handleAddCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCategoryError(null);
 interface Category {
   id: string;
   name: string;
@@ -38,6 +48,9 @@ const CategoriesPage = () => {
         .from('categories')
         .insert([{ name: newCategoryName, monthly_limit: newCategoryLimit || null, user_id: user.id }])
         .select();
+      if (error) {
+        setCategoryError('Failed to create category. Please try again.');
+      } else if (data) {
       if (data) {
         setCategories([...categories, data[0]]);
         setNewCategoryName('');
@@ -45,6 +58,9 @@ const CategoriesPage = () => {
       }
     }
   };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error loading categories.</p>;
 
   return (
     <div>

@@ -1,37 +1,9 @@
 'use client';
-
-import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import withAuth from '@/components/withAuth';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-interface Account {
-  id: string;
-  name: string;
-  type: 'bancaria' | 'investimento';
-}
-
-const AccountsPage = () => {
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [newAccountName, setNewAccountName] = useState('');
-  const [newAccountType, setNewAccountType] = useState<'bancaria' | 'investimento'>('bancaria');
-
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (user.id) {
-        const { data, error } = await supabase.from('accounts').select('*').eq('user_id', user.id);
-        if (data) setAccounts(data);
-      }
-    };
-    fetchAccounts();
-  }, []);
-
-  const handleAddAccount = async (e: React.FormEvent) => {
-    e.preventDefault();
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (newAccountName && user.id) {
       const { data, error } = await supabase

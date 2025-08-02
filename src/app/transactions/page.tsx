@@ -1,5 +1,9 @@
 'use client';
 
+import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import withAuth from '@/components/withAuth';
+import { useSupabase } from '@/hooks/useSupabase';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import withAuth from '@/components/withAuth';
@@ -9,6 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+const TransactionsPage = () => {
+  const { data: accounts } = useSupabase('accounts');
+  const { data: categories } = useSupabase('categories');
 interface Account {
   id: string;
   name: string;
@@ -26,6 +33,11 @@ const TransactionsPage = () => {
   const [date, setDate] = useState('');
   const [accountId, setAccountId] = useState('');
   const [categoryId, setCategoryId] = useState('');
+  const [transactionError, setTransactionError] = useState<string | null>(null);
+
+  const handleAddTransaction = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setTransactionError(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -58,6 +70,9 @@ const TransactionsPage = () => {
           user_id: user.id,
         }])
         .select();
+      if (error) {
+        setTransactionError('Failed to add transaction. Please try again.');
+      } else if (data) {
       if (data) {
         // Reset form
         setType('gasto');
@@ -77,6 +92,11 @@ const TransactionsPage = () => {
         <CardHeader>
           <CardTitle>New Transaction</CardTitle>
         </CardHeader>
+        {transactionError && (
+          <div style={{ color: 'red', padding: '1rem' }}>
+            {transactionError}
+          </div>
+        )}
         <CardContent>
           <form onSubmit={handleAddTransaction}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

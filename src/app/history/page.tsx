@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import withAuth from '@/components/withAuth';
+import { useSupabase } from '@/hooks/useSupabase';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from '@/lib/supabase';
 import withAuth from '@/components/withAuth';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -19,6 +22,14 @@ interface Transaction {
 }
 
 const HistoryPage = () => {
+  const { data: transactions, loading, error } = useSupabase('transactions');
+  const { data: accounts } = useSupabase('accounts');
+  const { data: categories } = useSupabase('categories');
+  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
+  const [filters, setFilters] = useState({ type: '', accountId: '', categoryId: '' });
+
+  useEffect(() => {
+    let filtered = transactions as Transaction[];
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [accounts, setAccounts] = useState<{ id: string, name: string }[]>([]);
@@ -85,6 +96,9 @@ const HistoryPage = () => {
     link.click();
     document.body.removeChild(link);
   };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error loading history.</p>;
 
   return (
     <div>

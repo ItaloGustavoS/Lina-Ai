@@ -1,11 +1,29 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextRequest, NextResponse } from 'next/server';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+if (!process.env.GEMINI_API_KEY) {
+  throw new Error('Missing GEMINI_API_KEY environment variable');
+}
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export async function POST(req: NextRequest) {
   try {
-    const { transactions } = await req.json();
+    const body = await req.json();
+
+    // Validate that 'transactions' is present and is an array
+    if (
+      !body ||
+      !('transactions' in body) ||
+      !Array.isArray(body.transactions)
+    ) {
+      return NextResponse.json(
+        { error: "'transactions' is required and must be an array." },
+        { status: 400 }
+      );
+    }
+
+    const { transactions } = body;
 
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 

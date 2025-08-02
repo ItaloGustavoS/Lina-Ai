@@ -102,6 +102,35 @@ const DashboardPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
           <label>Month:</label>
+          <Input
+            type="number"
+            min={1}
+            max={12}
+            value={month}
+            onChange={e => {
+              const value = parseInt(e.target.value, 10);
+              if (!isNaN(value) && value >= 1 && value <= 12) {
+                setMonth(value);
+              }
+            }}
+          />
+        </div>
+        <div>
+          <label>Year:</label>
+          <Input
+            type="number"
+            min={1900}
+            max={new Date().getFullYear() + 10}
+            value={year}
+            onChange={e => {
+              const val = parseInt(e.target.value);
+              const minYear = 1900;
+              const maxYear = new Date().getFullYear() + 10;
+              if (!isNaN(val) && val >= minYear && val <= maxYear) {
+                setYear(val);
+              }
+            }}
+          />
           <Input type="number" value={month} onChange={e => setMonth(parseInt(e.target.value))} />
         </div>
         <div>
