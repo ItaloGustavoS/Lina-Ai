@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lina AI - Controle Financeiro Inteligente
 
-## Getting Started
+Lina AI é uma aplicação de controle financeiro que utiliza inteligência artificial para fornecer insights sobre seus hábitos de consumo e ajudá-lo a atingir suas metas de economia.
 
-First, run the development server:
+## Funcionalidades
+
+*   **Dashboard:** Visualize um resumo de suas finanças, incluindo despesas por categoria, receitas vs. despesas e contas a pagar.
+*   **Transações:** Adicione, edite e exclua suas transações financeiras.
+*   **Contas:** Gerencie suas contas bancárias e de investimento.
+*   **Categorias:** Crie e gerencie categorias para suas transações, com a opção de definir limites de gastos mensais.
+*   **Metas de Economia:** Defina e acompanhe suas metas de economia.
+*   **Análise de IA:** Obtenha insights detalhados sobre seus hábitos de consumo com a ajuda do Gemini, a IA do Google.
+*   **Lembretes e Notificações:** Receba alertas sobre contas a pagar e limites de categoria que estão sendo atingidos.
+*   **Animações Suaves:** Desfrute de uma experiência de usuário fluida com animações e transições de página suaves.
+
+## Como Iniciar em Desenvolvimento
+
+Para executar a aplicação em modo de desenvolvimento, siga estas etapas:
+
+1.  **Clone o repositório:**
+    ```bash
+    git clone https://github.com/seu-usuario/lina-ai.git
+    cd lina-ai
+    ```
+
+2.  **Instale as dependências:**
+    ```bash
+    npm install
+    ```
+
+3.  **Configure as variáveis de ambiente:**
+    Crie um arquivo `.env.local` na raiz do projeto e adicione as seguintes variáveis:
+    ```
+    NEXT_PUBLIC_SUPABASE_URL=URL_DO_SEU_PROJETO_SUPABASE
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=SUA_CHAVE_ANON_SUPABASE
+    GEMINI_API_KEY=SUA_CHAVE_API_GEMINI
+    ```
+
+4.  **Execute a aplicação:**
+    ```bash
+    npm run dev
+    ```
+
+A aplicação estará disponível em `http://localhost:3000`.
+
+## Como Buildar a Aplicação
+
+Para buildar a aplicação para produção, execute o seguinte comando:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Este comando irá gerar uma versão otimizada da aplicação na pasta `.next`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Como Rodar a Aplicação Buildada Localmente
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Para rodar a versão buildada da aplicação localmente, execute o seguinte comando:
 
-## Learn More
+```bash
+npm run start
+```
 
-To learn more about Next.js, take a look at the following resources:
+A aplicação estará disponível em `http://localhost:3000`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Como Hospedar na Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Para hospedar a aplicação na Vercel, siga estas etapas:
 
-## Deploy on Vercel
+1.  **Crie uma conta na Vercel:**
+    Acesse [vercel.com](https://vercel.com) e crie uma conta.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2.  **Importe o projeto:**
+    No dashboard da Vercel, clique em "Add New..." e selecione "Project". Importe seu repositório do GitHub.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3.  **Configure o projeto:**
+    A Vercel irá detectar automaticamente que é um projeto Next.js. Você precisará configurar as variáveis de ambiente na seção "Environment Variables" do seu projeto na Vercel. Adicione as mesmas variáveis de ambiente que você configurou no arquivo `.env.local`.
+
+4.  **Deploy:**
+    Clique em "Deploy" para iniciar o processo de build e deploy. Após a conclusão, sua aplicação estará disponível em um domínio fornecido pela Vercel.
