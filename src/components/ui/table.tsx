@@ -33,13 +33,6 @@ function createTableSlot<
 
 // keep your original Table wrapper
 export function Table({ className, ...props }: React.ComponentProps<"table">) {
-=======
-
-import * as React from "react"
-
-import { cn } from "@/lib/utils"
-
-function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <div
       data-slot="table-container"
@@ -89,6 +82,7 @@ export const TableCaption = createTableSlot(
   "table-caption",
   "text-muted-foreground mt-4 text-sm"
 )
+
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
@@ -184,3 +178,4 @@ export {
   TableCell,
   TableCaption,
 }
+

@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import withAuth from '@/components/withAuth';
 import { useSupabase } from '@/hooks/useSupabase';
+import { supabase } from '@/lib/supabase';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from '@/lib/supabase';
 import withAuth from '@/components/withAuth';
@@ -22,6 +24,7 @@ interface Transaction {
 }
 
 const HistoryPage = () => {
+  const { data: transactions, setData: setTransactions, loading, error } = useSupabase('transactions');
   const { data: transactions, loading, error } = useSupabase('transactions');
   const { data: accounts } = useSupabase('accounts');
   const { data: categories } = useSupabase('categories');
@@ -30,6 +33,7 @@ const HistoryPage = () => {
 
   useEffect(() => {
     let filtered = transactions as Transaction[];
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [accounts, setAccounts] = useState<{ id: string, name: string }[]>([]);
@@ -75,6 +79,13 @@ const HistoryPage = () => {
 
   const handleFilterChange = (filterName: string, value: string) => {
     setFilters(prev => ({ ...prev, [filterName]: value }));
+  };
+
+  const handleDeleteTransaction = async (id: string) => {
+    const { error } = await supabase.from('transactions').delete().eq('id', id);
+    if (!error) {
+      setTransactions(transactions.filter(t => t.id !== id));
+    }
   };
 
   const exportToCSV = () => {
@@ -147,6 +158,7 @@ const HistoryPage = () => {
             <TableHead>Description</TableHead>
             <TableHead>Account</TableHead>
             <TableHead>Category</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -158,6 +170,9 @@ const HistoryPage = () => {
               <TableCell>{transaction.description}</TableCell>
               <TableCell>{transaction.account?.name}</TableCell>
               <TableCell>{transaction.category?.name}</TableCell>
+              <TableCell>
+                <Button variant="destructive" size="sm" onClick={() => handleDeleteTransaction(transaction.id)}>Delete</Button>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

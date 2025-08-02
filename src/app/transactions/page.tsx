@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 const TransactionsPage = () => {
   const { data: accounts } = useSupabase('accounts');
   const { data: categories } = useSupabase('categories');
+
 interface Account {
   id: string;
   name: string;
@@ -38,6 +39,7 @@ const TransactionsPage = () => {
   const handleAddTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
     setTransactionError(null);
+
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -56,6 +58,7 @@ const TransactionsPage = () => {
 
   const handleAddTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (amount && date && accountId && categoryId && user.id) {
       const { data, error } = await supabase
@@ -73,6 +76,7 @@ const TransactionsPage = () => {
       if (error) {
         setTransactionError('Failed to add transaction. Please try again.');
       } else if (data) {
+
       if (data) {
         // Reset form
         setType('gasto');

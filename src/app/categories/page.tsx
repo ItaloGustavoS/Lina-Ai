@@ -8,16 +8,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const CategoriesPage = () => {
   const { data: categories, setData: setCategories, loading, error } = useSupabase('categories');
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryLimit, setNewCategoryLimit] = useState('');
   const [categoryError, setCategoryError] = useState<string | null>(null);
+  const [editingCategory, setEditingCategory] = useState<any>(null);
 
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     setCategoryError(null);
+
 interface Category {
   id: string;
   name: string;
@@ -56,6 +59,27 @@ const CategoriesPage = () => {
         setNewCategoryName('');
         setNewCategoryLimit('');
       }
+    }
+  };
+
+  const handleUpdateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCategory) return;
+    const { data, error } = await supabase
+      .from('categories')
+      .update({ name: editingCategory.name, monthly_limit: editingCategory.monthly_limit || null })
+      .eq('id', editingCategory.id)
+      .select();
+    if (data) {
+      setCategories(categories.map(c => c.id === editingCategory.id ? data[0] : c));
+      setEditingCategory(null);
+    }
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    const { error } = await supabase.from('categories').delete().eq('id', id);
+    if (!error) {
+      setCategories(categories.filter(c => c.id !== id));
     }
   };
 
@@ -104,6 +128,54 @@ const CategoriesPage = () => {
             <ul>
               {categories.map((category) => (
                 <li key={category.id} className="flex justify-between items-center p-2 border-b">
+
+                  <div>
+                    <span>{category.name}</span>
+                    <span className="text-sm text-gray-500 ml-2">
+                      {category.monthly_limit ? `$${category.monthly_limit}` : 'No limit'}
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Dialog open={editingCategory?.id === category.id} onOpenChange={() => setEditingCategory(editingCategory?.id === category.id ? null : category)}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">Edit</Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Edit Category</DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={handleUpdateCategory}>
+                          <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="name" className="text-right">
+                                Name
+                              </Label>
+                              <Input
+                                id="name"
+                                value={editingCategory?.name || ''}
+                                onChange={(e) => setEditingCategory({ ...editingCategory, name: e.target.value })}
+                                className="col-span-3"
+                              />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="limit" className="text-right">
+                                Limit
+                              </Label>
+                              <Input
+                                id="limit"
+                                type="number"
+                                value={editingCategory?.monthly_limit || ''}
+                                onChange={(e) => setEditingCategory({ ...editingCategory, monthly_limit: e.target.value })}
+                                className="col-span-3"
+                              />
+                            </div>
+                          </div>
+                          <Button type="submit">Save changes</Button>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                    <Button variant="destructive" size="sm" onClick={() => handleDeleteCategory(category.id)}>Delete</Button>
+                  </div>
                   <span>{category.name}</span>
                   <span className="text-sm text-gray-500">
                     {category.monthly_limit ? `$${category.monthly_limit}` : 'No limit'}
