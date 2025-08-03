@@ -7,8 +7,6 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 
 ## [Unreleased]
 
-### Added
-
 ## [1.0.0] - 2024-07-25
 
 ### Adicionado

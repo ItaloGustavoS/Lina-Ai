@@ -41,6 +41,11 @@ Para executar a aplicação em modo de desenvolvimento, siga estas etapas:
     npm run dev
     ```
 
+## Pré-requisitos
+
+- Node.js (versão 18.x ou superior)
+- npm ou yarn
+
 A aplicação estará disponível em `http://localhost:3000`.
 
 ## Pré-requisitos
