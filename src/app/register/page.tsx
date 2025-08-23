@@ -24,6 +24,11 @@ const RegisterPage = () => {
       return;
     }
 
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long.');
+      return;
+    }
+
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
