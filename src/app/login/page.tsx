@@ -116,6 +116,12 @@ const LoginPage = () => {
               {isLoading ? 'Processing...' : 'Login / Sign Up'}
             </Button>
           </form>
+          <div className="mt-4 text-center text-sm text-gray-400">
+            Don't have an account?{' '}
+            <a href="/register" className="font-medium text-indigo-400 hover:text-indigo-500">
+              Register
+            </a>
+          </div>
         </CardContent>
       </Card>
     </div>
