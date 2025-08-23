@@ -13,7 +13,7 @@ async function setupDatabase() {
   const { error: investmentsError } = await supabase.rpc('exec', {
     sql: `
       BEGIN;
-      CREATE TABLE investments (
+      CREATE TABLE IF NOT EXISTS investments (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID REFERENCES auth.users(id),
         ticker TEXT NOT NULL,
@@ -35,7 +35,7 @@ async function setupDatabase() {
   const { error: investmentHistoryError } = await supabase.rpc('exec', {
     sql: `
       BEGIN;
-      CREATE TABLE investment_history (
+      CREATE TABLE IF NOT EXISTS investment_history (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         investment_id UUID REFERENCES investments(id),
         date DATE NOT NULL,

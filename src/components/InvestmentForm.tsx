@@ -22,6 +22,19 @@ const InvestmentForm = () => {
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (ticker && quantity && purchasePrice && purchaseDate && user.id) {
+      const quantityNum = parseInt(quantity, 10);
+      const purchasePriceNum = parseFloat(purchasePrice);
+
+      if (isNaN(quantityNum) || quantityNum <= 0) {
+        setError('Please enter a valid quantity.');
+        return;
+      }
+
+      if (isNaN(purchasePriceNum) || purchasePriceNum <= 0) {
+        setError('Please enter a valid purchase price.');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('investments')
         .insert([

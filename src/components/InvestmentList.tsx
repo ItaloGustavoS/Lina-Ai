@@ -23,6 +23,7 @@ interface Investment {
 const InvestmentList = () => {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchInvestments = async () => {
@@ -33,7 +34,9 @@ const InvestmentList = () => {
           .select('*')
           .eq('user_id', user.id);
 
-        if (data) {
+        if (error) {
+          setError(error.message || 'Unknown error');
+        } else if (data) {
           setInvestments(data);
         }
       }
@@ -88,6 +91,10 @@ const InvestmentList = () => {
       }
     }
   };
+
+  if (error) {
+    return <div className="text-red-500">Error loading investments: {error}</div>;
+  }
 
   if (loading) {
     return <div>Loading...</div>;

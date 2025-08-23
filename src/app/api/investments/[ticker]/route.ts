@@ -11,16 +11,29 @@ export async function GET(
     return new NextResponse('Missing BRAPI_API_TOKEN', { status: 500 });
   }
 
-  const response = await fetch(
-    `https://brapi.dev/api/quote/${ticker}?token=${token}`
-  );
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-  if (!response.ok) {
-    return new NextResponse('Failed to fetch data from brapi.dev', {
-      status: response.status,
-    });
+    const response = await fetch(
+      `https://brapi.dev/api/quote/${ticker}?token=${token}`,
+      { signal: controller.signal }
+    );
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      return new NextResponse('Failed to fetch data from brapi.dev', {
+        status: response.status,
+      });
+    }
+
+    const data = await response.json();
+    return NextResponse.json(data);
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      return new NextResponse('Request timed out', { status: 408 });
+    }
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
-
-  const data = await response.json();
-  return NextResponse.json(data);
 }
