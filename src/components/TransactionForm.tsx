@@ -30,7 +30,7 @@ interface TransactionFormProps {
 
 const TransactionForm = ({ accounts, categories, transaction, onTransactionAdded, onTransactionUpdated }: TransactionFormProps) => {
   const [type, setType] = useState(transaction?.type || 'gasto');
-  const [amount, setAmount] = useState(transaction?.amount.toString() || '');
+  const [amount, setAmount] = useState(transaction?.amount != null ? String(transaction.amount) : '');
   const [description, setDescription] = useState(transaction?.description || '');
   const [date, setDate] = useState(transaction?.date || '');
   const [dueDate, setDueDate] = useState(transaction?.due_date || '');
@@ -82,6 +82,7 @@ const TransactionForm = ({ accounts, categories, transaction, onTransactionAdded
           setAmount('');
           setDescription('');
           setDate('');
+          setDueDate('');
           setAccountId('');
           setCategoryId('');
         }

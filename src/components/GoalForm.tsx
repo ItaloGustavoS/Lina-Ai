@@ -59,6 +59,7 @@ const GoalForm = ({ goal, onGoalAdded, onGoalUpdated }: GoalFormProps) => {
           onGoalAdded(data[0]);
           setName('');
           setTargetAmount('');
+          setCurrentAmount('0');
           setDueDate('');
         }
       }

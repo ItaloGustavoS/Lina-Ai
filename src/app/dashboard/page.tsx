@@ -56,7 +56,7 @@ const DashboardPage = () => {
       }
     };
     fetchTransactions();
-  }, []);
+  }, [month, year]);
 
   const handleAnalyze = async () => {
     setLoadingAnalysis(true);
