@@ -6,8 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-const InvestmentForm = () => {
+interface InvestmentFormProps {
+  onInvestmentAdded: () => void;
+}
+
+const InvestmentForm = ({ onInvestmentAdded }: InvestmentFormProps) => {
   const [ticker, setTicker] = useState('');
   const [quantity, setQuantity] = useState('');
   const [purchasePrice, setPurchasePrice] = useState('');
@@ -20,9 +25,10 @@ const InvestmentForm = () => {
     setError(null);
     setSuccess(null);
 
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (ticker && quantity && purchasePrice && purchaseDate && user.id) {
-      const quantityNum = parseInt(quantity, 10);
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (ticker && quantity && purchasePrice && purchaseDate && user.id) {
+        const quantityNum = parseInt(quantity, 10);
       const purchasePriceNum = parseFloat(purchasePrice);
 
       if (isNaN(quantityNum) || quantityNum <= 0) {
@@ -55,7 +61,11 @@ const InvestmentForm = () => {
         setQuantity('');
         setPurchasePrice('');
         setPurchaseDate('');
+        onInvestmentAdded();
       }
+    }
+    } catch (e) {
+      setError('Failed to parse user data from localStorage.');
     }
   };
 
@@ -64,17 +74,19 @@ const InvestmentForm = () => {
       <CardHeader>
         <CardTitle>Add New Investment</CardTitle>
       </CardHeader>
-      {error && (
-        <div style={{ color: 'red', padding: '1rem' }}>
-          {error}
-        </div>
-      )}
-      {success && (
-        <div style={{ color: 'green', padding: '1rem' }}>
-          {success}
-        </div>
-      )}
       <CardContent>
+        {error && (
+          <Alert variant="destructive">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        {success && (
+          <Alert>
+            <AlertTitle>Success</AlertTitle>
+            <AlertDescription>{success}</AlertDescription>
+          </Alert>
+        )}
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="grid gap-2">

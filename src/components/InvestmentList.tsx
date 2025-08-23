@@ -25,8 +25,8 @@ const InvestmentList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchInvestments = async () => {
+  const fetchInvestments = async () => {
+    try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       if (user.id) {
         const { data, error } = await supabase
@@ -40,55 +40,53 @@ const InvestmentList = () => {
           setInvestments(data);
         }
       }
+    } catch (e) {
+      setError('Failed to parse user data from localStorage.');
+    } finally {
       setLoading(false);
-    };
+    }
+  };
 
+  useEffect(() => {
     fetchInvestments();
   }, []);
 
   const handleUpdate = async (investmentId: string, ticker: string) => {
-    const response = await fetch(`/api/investments/${ticker}`);
-    const data = await response.json();
+    try {
+      const response = await fetch(`/api/investments/${ticker}`);
+      const data = await response.json();
 
-    if (data.results && data.results.length > 0) {
-      const latestPrice = data.results[0].regularMarketPrice;
+      if (data.results && data.results.length > 0) {
+        const latestPrice = data.results[0].regularMarketPrice;
 
-      const { error: updateError } = await supabase
-        .from('investments')
-        .update({ current_price: latestPrice })
-        .eq('id', investmentId);
-
-      if (updateError) {
-        console.error('Error updating investment:', updateError);
-        return;
-      }
-
-      const { error: historyError } = await supabase
-        .from('investment_history')
-        .insert([
-          {
-            investment_id: investmentId,
-            date: new Date().toISOString().split('T')[0],
-            price: latestPrice,
-          },
-        ]);
-
-      if (historyError) {
-        console.error('Error inserting investment history:', historyError);
-      }
-
-      // Refetch investments to update the UI
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (user.id) {
-        const { data, error } = await supabase
+        const { error: updateError } = await supabase
           .from('investments')
-          .select('*')
-          .eq('user_id', user.id);
+          .update({ current_price: latestPrice })
+          .eq('id', investmentId);
 
-        if (data) {
-          setInvestments(data);
+        if (updateError) {
+        setError('Failed to update investment.');
+          return;
         }
+
+        const { error: historyError } = await supabase
+          .from('investment_history')
+          .insert([
+            {
+              investment_id: investmentId,
+              date: new Date().toISOString().split('T')[0],
+              price: latestPrice,
+            },
+          ]);
+
+        if (historyError) {
+        setError('Failed to save investment history.');
+        }
+
+        fetchInvestments();
       }
+    } catch (e) {
+      setError('Failed to update investment.');
     }
   };
 

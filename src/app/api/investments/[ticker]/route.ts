@@ -8,7 +8,8 @@ export async function GET(
   const token = process.env.BRAPI_API_TOKEN;
 
   if (!token) {
-    return new NextResponse('Missing BRAPI_API_TOKEN', { status: 500 });
+    console.error('Missing BRAPI_API_TOKEN');
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 
   try {

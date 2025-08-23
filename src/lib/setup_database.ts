@@ -20,6 +20,7 @@ async function setupDatabase() {
         quantity INT NOT NULL,
         purchase_price DECIMAL(10, 2) NOT NULL,
         purchase_date DATE NOT NULL,
+        current_price DECIMAL(10, 2),
         created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
       );
       COMMIT;
