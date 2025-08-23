@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from './ui/button';
+import { useSession } from '@/hooks/useSession';
 
 interface Investment {
   id: string;
@@ -21,30 +22,25 @@ interface Investment {
 }
 
 const InvestmentList = () => {
+  const { user } = useSession();
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchInvestments = async () => {
-    try {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (user.id) {
-        const { data, error } = await supabase
-          .from('investments')
-          .select('*')
-          .eq('user_id', user.id);
+    if (user) {
+      const { data, error } = await supabase
+        .from('investments')
+        .select('*')
+        .eq('user_id', user.id);
 
-        if (error) {
-          setError(error.message || 'Unknown error');
-        } else if (data) {
-          setInvestments(data);
-        }
+      if (error) {
+        setError(error.message || 'Unknown error');
+      } else if (data) {
+        setInvestments(data);
       }
-    } catch (e) {
-      setError('Failed to parse user data from localStorage.');
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -54,33 +50,23 @@ const InvestmentList = () => {
   const handleUpdate = async (investmentId: string, ticker: string) => {
     try {
       const response = await fetch(`/api/investments/${ticker}`);
+      if (!response.ok) {
+        setError('Failed to fetch investment data.');
+        return;
+      }
       const data = await response.json();
 
       if (data.results && data.results.length > 0) {
         const latestPrice = data.results[0].regularMarketPrice;
 
-        const { error: updateError } = await supabase
-          .from('investments')
-          .update({ current_price: latestPrice })
-          .eq('id', investmentId);
+        const { error } = await supabase.rpc('update_investment', {
+          investment_id_param: investmentId,
+          new_price: latestPrice,
+        });
 
-        if (updateError) {
-        setError('Failed to update investment.');
+        if (error) {
+          setError('Failed to update investment.');
           return;
-        }
-
-        const { error: historyError } = await supabase
-          .from('investment_history')
-          .insert([
-            {
-              investment_id: investmentId,
-              date: new Date().toISOString().split('T')[0],
-              price: latestPrice,
-            },
-          ]);
-
-        if (historyError) {
-        setError('Failed to save investment history.');
         }
 
         fetchInvestments();

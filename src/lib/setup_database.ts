@@ -23,6 +23,15 @@ async function setupDatabase() {
         current_price DECIMAL(10, 2),
         created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
       );
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_indexes WHERE tablename = 'investments' AND indexname = 'investments_user_id_idx'
+        ) THEN
+          CREATE INDEX investments_user_id_idx ON investments(user_id);
+        END IF;
+      END
+      $$;
       COMMIT;
     `,
   });
@@ -43,6 +52,7 @@ async function setupDatabase() {
         price DECIMAL(10, 2) NOT NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
       );
+      CREATE INDEX IF NOT EXISTS idx_investment_history_investment_id ON investment_history (investment_id);
       COMMIT;
     `,
   });

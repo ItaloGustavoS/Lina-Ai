@@ -7,12 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useSession } from '@/hooks/useSession';
 
 interface InvestmentFormProps {
   onInvestmentAdded: () => void;
 }
 
 const InvestmentForm = ({ onInvestmentAdded }: InvestmentFormProps) => {
+  const { user } = useSession();
   const [ticker, setTicker] = useState('');
   const [quantity, setQuantity] = useState('');
   const [purchasePrice, setPurchasePrice] = useState('');
@@ -25,10 +27,8 @@ const InvestmentForm = ({ onInvestmentAdded }: InvestmentFormProps) => {
     setError(null);
     setSuccess(null);
 
-    try {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (ticker && quantity && purchasePrice && purchaseDate && user.id) {
-        const quantityNum = parseInt(quantity, 10);
+    if (user && ticker && quantity && purchasePrice && purchaseDate) {
+      const quantityNum = parseInt(quantity, 10);
       const purchasePriceNum = parseFloat(purchasePrice);
 
       if (isNaN(quantityNum) || quantityNum <= 0) {
@@ -47,8 +47,8 @@ const InvestmentForm = ({ onInvestmentAdded }: InvestmentFormProps) => {
           {
             user_id: user.id,
             ticker,
-            quantity: parseInt(quantity),
-            purchase_price: parseFloat(purchasePrice),
+            quantity: quantityNum,
+            purchase_price: purchasePriceNum,
             purchase_date: purchaseDate,
           },
         ]);
@@ -63,9 +63,6 @@ const InvestmentForm = ({ onInvestmentAdded }: InvestmentFormProps) => {
         setPurchaseDate('');
         onInvestmentAdded();
       }
-    }
-    } catch (e) {
-      setError('Failed to parse user data from localStorage.');
     }
   };
 

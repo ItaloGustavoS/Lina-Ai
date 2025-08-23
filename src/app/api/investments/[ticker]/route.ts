@@ -24,9 +24,22 @@ export async function GET(
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      return new NextResponse('Failed to fetch data from brapi.dev', {
-        status: response.status,
-      });
+      let errorDetails;
+      try {
+        errorDetails = await response.json();
+      } catch {
+        errorDetails = await response.text();
+      }
+      return new NextResponse(
+        JSON.stringify({
+          message: 'Failed to fetch data from brapi.dev',
+          details: errorDetails,
+        }),
+        {
+          status: response.status,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     const data = await response.json();
