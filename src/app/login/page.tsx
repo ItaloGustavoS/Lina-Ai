@@ -11,8 +11,8 @@ import Link from 'next/link';
 import { useSession } from '@/hooks/useSession';
 
 const LoginPage = () => {
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -23,43 +23,39 @@ const LoginPage = () => {
     setError(null);
     setIsLoading(true);
 
-    if (!name || !email) {
-      setError('Please enter both name and email.');
+    if (!email || !password) {
+      setError('Please enter both email and password.');
       setIsLoading(false);
       return;
     }
 
     try {
-      // Check if user with email already exists
-      const { data: existingUser, error: selectError } = await supabase
-        .from('users')
-        .select('id, name')
-        .eq('email', email)
-        .single();
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-      if (selectError && selectError.code !== 'PGRST116') { // PGRST116 = no rows found
-        throw new Error(selectError.message);
+      if (authError) {
+        throw new Error(authError.message);
       }
 
-      if (existingUser) {
-        // User exists, log them in
-        login({ id: existingUser.id, name: existingUser.name, email });
-        router.push('/dashboard');
-      } else {
-        // User does not exist, create a new user
-        const { data: newUser, error: insertError } = await supabase
+      if (authData.user) {
+        const { data: user, error: userError } = await supabase
           .from('users')
-          .insert([{ name, email }])
-          .select('id, name')
+          .select('id, name, email')
+          .eq('id', authData.user.id)
           .single();
 
-        if (insertError) {
-          throw new Error(insertError.message);
+        if (userError) {
+          throw new Error(userError.message);
         }
 
-        if (newUser) {
-          login({ id: newUser.id, name: newUser.name, email });
+        if (user) {
+          login({ id: user.id, name: user.name, email: user.email });
           router.push('/dashboard');
+        } else {
+          // This case should ideally not happen if registration is done correctly
+          throw new Error('User not found in our records after login.');
         }
       }
     } catch (err: unknown) {
@@ -77,9 +73,9 @@ const LoginPage = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
       <Card className="w-full max-w-md bg-gray-800 border-gray-700">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-white">Welcome to Lina AI</CardTitle>
+          <CardTitle className="text-2xl font-bold text-white">Welcome back to Lina AI</CardTitle>
           <CardDescription className="text-gray-400">
-            Enter your details to log in or create an account.
+            Enter your credentials to access your account.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -89,19 +85,6 @@ const LoginPage = () => {
                 {error}
               </div>
             )}
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-gray-300">Name</Label>
-              <Input
-                id="name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="John Doe"
-                required
-                className="bg-gray-700 border-gray-600 text-white"
-                disabled={isLoading}
-              />
-            </div>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-gray-300">Email</Label>
               <Input
@@ -115,14 +98,27 @@ const LoginPage = () => {
                 disabled={isLoading}
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-gray-300">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="********"
+                required
+                className="bg-gray-700 border-gray-600 text-white"
+                disabled={isLoading}
+              />
+            </div>
             <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700" disabled={isLoading}>
-              {isLoading ? 'Processing...' : 'Login / Sign Up'}
+              {isLoading ? 'Logging in...' : 'Login'}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm text-gray-400">
-            Don't have an account?{' '}
+            Don't have an account yet?{' '}
             <Link href="/register" className="font-medium text-indigo-400 hover:text-indigo-500">
-              Register
+              Sign up
             </Link>
           </div>
         </CardContent>

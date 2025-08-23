@@ -7,16 +7,24 @@ import { useSession } from '@/hooks/useSession';
 const withAuth = <P extends object>(WrappedComponent: React.ComponentType<P>) => {
   const Wrapper = (props: P) => {
     const router = useRouter();
-    const { user } = useSession();
+    const { user, isLoading, checkSession } = useSession();
 
     useEffect(() => {
-      if (!user) {
+      checkSession();
+    }, [checkSession]);
+
+    useEffect(() => {
+      if (!isLoading && !user) {
         router.push('/login');
       }
-    }, [user, router]);
+    }, [user, isLoading, router]);
 
-    if (!user) {
-      return null; // or a loading spinner
+    if (isLoading || !user) {
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-xl font-semibold">Loading...</div>
+        </div>
+      );
     }
 
     return <WrappedComponent {...props} />;
