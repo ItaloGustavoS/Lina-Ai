@@ -85,6 +85,7 @@ const TransactionForm = ({ accounts, categories, transaction, onTransactionAdded
           setDueDate('');
           setAccountId('');
           setCategoryId('');
+          setType('gasto');
         }
       }
     }
