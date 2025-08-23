@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { validateEmail } from '@/lib/utils';
 
 const RegisterPage = () => {
   const [email, setEmail] = useState('');
@@ -24,27 +25,18 @@ const RegisterPage = () => {
     }
 
     try {
-      const { data: existingUsers, error: fetchError } = await supabase
-        .from('users')
-        .select('email')
-        .eq('email', email);
-
-      if (fetchError) {
-        throw fetchError;
-      }
-
-      if (existingUsers && existingUsers.length > 0) {
-        setError('This email is already registered.');
-        return;
-      }
-
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
       });
 
       if (error) {
-        throw error;
+        if (error.message.includes('User already registered')) {
+          setError('This email is already registered.');
+        } else {
+          throw error;
+        }
+        return;
       }
 
       if (data.user) {
@@ -57,11 +49,6 @@ const RegisterPage = () => {
     } catch (error: any) {
       setError(error.message);
     }
-  };
-
-  const validateEmail = (email: string) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(String(email).toLowerCase());
   };
 
   return (
