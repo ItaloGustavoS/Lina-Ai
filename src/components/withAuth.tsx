@@ -2,17 +2,22 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from '@/hooks/useSession';
 
 const withAuth = <P extends object>(WrappedComponent: React.ComponentType<P>) => {
   const Wrapper = (props: P) => {
     const router = useRouter();
+    const { user } = useSession();
 
     useEffect(() => {
-      const user = localStorage.getItem('user');
       if (!user) {
         router.push('/login');
       }
-    }, [router]);
+    }, [user, router]);
+
+    if (!user) {
+      return null; // or a loading spinner
+    }
 
     return <WrappedComponent {...props} />;
   };

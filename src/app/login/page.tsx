@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
+import { useSession } from '@/hooks/useSession';
 
 const LoginPage = () => {
   const [name, setName] = useState('');
@@ -15,6 +16,7 @@ const LoginPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { login } = useSession();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +43,7 @@ const LoginPage = () => {
 
       if (existingUser) {
         // User exists, log them in
-        localStorage.setItem('user', JSON.stringify({ id: existingUser.id, name: existingUser.name, email }));
+        login({ id: existingUser.id, name: existingUser.name, email });
         router.push('/dashboard');
       } else {
         // User does not exist, create a new user
@@ -56,7 +58,7 @@ const LoginPage = () => {
         }
 
         if (newUser) {
-          localStorage.setItem('user', JSON.stringify({ id: newUser.id, name: newUser.name, email }));
+          login({ id: newUser.id, name: newUser.name, email });
           router.push('/dashboard');
         }
       }

@@ -45,12 +45,10 @@ const RegisterPage = () => {
       }
 
       if (data.user) {
-        await supabase
-          .from('users')
-          .insert([{ id: data.user.id, email: data.user.email }]);
+        await supabase.from('users').insert([{ id: data.user.id, email: data.user.email, name: '' }]);
       }
 
-      router.push('/login');
+      router.push('/login?message=Registration successful. Please log in.');
     } catch (error: any) {
       setError(error.message);
     }
