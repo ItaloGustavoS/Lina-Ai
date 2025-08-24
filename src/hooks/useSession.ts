@@ -1,48 +1,44 @@
-import { create } from 'zustand';
-import { supabase } from '@/lib/supabase';
+import { create } from 'zustand'
+import { supabase } from '@/lib/supabase'
+import { fetchUserProfile } from '@/services/user'
 
 interface Session {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-  } | null;
-  login: (user: { id: string; name: string; email: string }) => void;
-  logout: () => Promise<void>;
-  checkSession: () => Promise<void>;
-  isLoading: boolean;
+  user: { id: string; name: string; email: string } | null
+  login: (user: { id: string; name: string; email: string }) => void
+  logout: () => Promise<void>
+  isLoading: boolean
 }
 
-export const useSession = create<Session>((set) => ({
-  user: null,
-  isLoading: true,
-  login: (user) => set({ user }),
-  logout: async () => {
-    await supabase.auth.signOut();
-    set({ user: null });
-  },
-  checkSession: async () => {
-    try {
-      const { data: { session }, } = await supabase.auth.getSession();
-      if (session) {
-        const { data: user, error } = await supabase
-          .from('users')
-          .select('id, name, email')
-          .eq('id', session.user.id)
-          .single();
+export const useSession = create<Session>((set) => {
+  // initial state
+  set({ user: null, isLoading: true })
 
-        if (error) {
-          throw error;
-        }
-
-        if (user) {
-          set({ user });
-        }
+  // subscribe to auth changes
+  supabase.auth.onAuthStateChange(async (_event, session) => {
+    if (session?.user) {
+      try {
+        const user = await fetchUserProfile(session.user.id)
+        set({ user })
+      } catch (e) {
+        console.error('profile fetch error:', e)
+        set({ user: null })
       }
-    } catch (error) {
-      console.error('Error checking session:', error);
-    } finally {
-      set({ isLoading: false });
+    } else {
+      set({ user: null })
     }
-  },
-}));
+    set({ isLoading: false })
+  })
+
+  return {
+    user: null,
+    isLoading: true,
+    login: (user) => {
+      set({ user, isLoading: false });
+    },
+    logout: async () => {
+      set({ isLoading: true });
+      await supabase.auth.signOut();
+      set({ user: null, isLoading: false });
+    },
+  }
+})

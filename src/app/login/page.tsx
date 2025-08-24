@@ -36,7 +36,16 @@ const LoginPage = () => {
       });
 
       if (authError) {
-        throw new Error(authError.message);
+        let userFriendlyMessage = "An unknown error occurred. Please try again.";
+        // Map common Supabase auth errors to user-friendly messages
+        if (authError.message?.toLowerCase().includes("invalid login credentials")) {
+          userFriendlyMessage = "Invalid email or password. Please check your credentials and try again.";
+        } else if (authError.message?.toLowerCase().includes("email not confirmed")) {
+          userFriendlyMessage = "Your email address has not been confirmed. Please check your inbox for a confirmation email.";
+        } else if (authError.message?.toLowerCase().includes("user not found")) {
+          userFriendlyMessage = "No account found with this email address.";
+        }
+        throw new Error(userFriendlyMessage);
       }
 
       if (authData.user) {

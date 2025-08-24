@@ -62,11 +62,12 @@ const RegisterPage = () => {
           .insert([{ id: data.user.id, email: data.user.email, name }]);
 
         if (insertError) {
-          // If user insertion fails, it's good practice to handle this,
-          // maybe by deleting the auth user or flagging for manual review.
-          // For now, we'll just log the error and inform the user.
-          console.error("Error inserting user:", insertError);
-          throw new Error("Could not save your user details. Please contact support.");
+          // If user profile creation fails after a successful auth sign-up,
+          // we have an orphaned auth user. Deleting the user requires admin
+          // privileges and cannot be done securely from the client-side.
+          // The best we can do is inform the user and log the error for manual review.
+          console.error("Orphaned user created. Auth user created but profile insertion failed. User ID:", data.user.id, "Error:", insertError);
+          throw new Error("Your account was created, but we couldn't set up your profile. Please contact support.");
         }
       }
 

@@ -7,11 +7,7 @@ import { useSession } from '@/hooks/useSession';
 const withAuth = <P extends object>(WrappedComponent: React.ComponentType<P>) => {
   const Wrapper = (props: P) => {
     const router = useRouter();
-    const { user, isLoading, checkSession } = useSession();
-
-    useEffect(() => {
-      checkSession();
-    }, [checkSession]);
+    const { user, isLoading } = useSession();
 
     useEffect(() => {
       if (!isLoading && !user) {
