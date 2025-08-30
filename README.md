@@ -34,6 +34,7 @@ Para executar a aplicação em modo de desenvolvimento, siga estas etapas:
     NEXT_PUBLIC_SUPABASE_URL=URL_DO_SEU_PROJETO_SUPABASE
     NEXT_PUBLIC_SUPABASE_ANON_KEY=SUA_CHAVE_ANON_SUPABASE
     GEMINI_API_KEY=SUA_CHAVE_API_GEMINI
+    BRAPI_API_TOKEN=BRAPI_API_TOKEN
     ```
 
 4.  **Execute a aplicação:**
