@@ -41,22 +41,32 @@ const RegisterPage = () => {
     }
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password }),
-      });
+      let response;
+      try {
+        response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name, email, password }),
+        });
+      } catch (error) {
+        // Network errors
+        setError('Network error: Please check your connection and try again.');
+        setIsLoading(false);
+        return;
+      }
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Something went wrong');
+        // API errors
+        throw new Error(data.error || 'An unexpected error occurred.');
       }
 
       router.push('/login?message=Registration successful! Please check your email to confirm your account and then log in.');
     } catch (error: any) {
+      // Handles errors thrown from the API response
       setError(error.message);
     } finally {
       setIsLoading(false);
