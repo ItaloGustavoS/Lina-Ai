@@ -35,7 +35,7 @@ const DashboardPage = () => {
     const fetchTransactions = async () => {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       if (user.id) {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('transactions')
           .select('*, category:categories(name)')
           .eq('user_id', user.id);
@@ -56,7 +56,7 @@ const DashboardPage = () => {
       }
     };
     fetchTransactions();
-  }, [month, year]);
+  }, [month, year, setTransactions]);
 
   const handleAnalyze = async () => {
     setLoadingAnalysis(true);
@@ -100,6 +100,12 @@ const DashboardPage = () => {
       return acc;
     }, [] as { name: string; value: number }[]);
 
+  const barChartData = [{
+    name: 'Finances',
+    income: incomeData.reduce((acc, i) => acc + i.value, 0),
+    expenses: expenseData.reduce((acc, e) => acc + e.value, 0)
+  }];
+
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
@@ -122,14 +128,15 @@ const DashboardPage = () => {
               </Button>
             </DialogTrigger>
             <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Financial Analysis</DialogTitle>
-            </DialogHeader>
-            <DialogDescription>
-              {analysis || 'No analysis available.'}
-            </DialogDescription>
-          </DialogContent>
-        </Dialog>
+              <DialogHeader>
+                <DialogTitle>Financial Analysis</DialogTitle>
+              </DialogHeader>
+              <DialogDescription>
+                {analysis || 'No analysis available.'}
+              </DialogDescription>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
@@ -189,7 +196,7 @@ const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={[{ name: 'Finances', income: incomeData.reduce((acc, i) => acc + i.value, 0), expenses: expenseData.reduce((acc, e) => acc + e.value, 0) }]}>
+              <BarChart data={barChartData}>
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />

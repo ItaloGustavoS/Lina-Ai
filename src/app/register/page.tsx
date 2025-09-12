@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,38 +41,37 @@ const RegisterPage = () => {
     }
 
     try {
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (signUpError) {
-        if (signUpError.message.includes('User already registered')) {
-          setError('This email is already registered.');
-        } else {
-          throw signUpError;
-        }
+      let response;
+      try {
+        response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name, email, password }),
+        });
+      } catch {
+        // Network errors
+        setError('Network error: Please check your connection and try again.');
+        setIsLoading(false);
         return;
       }
 
-      if (data.user) {
-        const { error: insertError } = await supabase
-          .from('users')
-          .insert([{ id: data.user.id, email: data.user.email, name }]);
+      const data = await response.json();
 
-        if (insertError) {
-          // If user profile creation fails after a successful auth sign-up,
-          // we have an orphaned auth user. Deleting the user requires admin
-          // privileges and cannot be done securely from the client-side.
-          // The best we can do is inform the user and log the error for manual review.
-          console.error("Orphaned user created. Auth user created but profile insertion failed. User ID:", data.user.id, "Error:", insertError);
-          throw new Error("Your account was created, but we couldn't set up your profile. Please contact support.");
-        }
+      if (!response.ok) {
+        // API errors
+        throw new Error(data.error || 'An unexpected error occurred.');
       }
 
       router.push('/login?message=Registration successful! Please check your email to confirm your account and then log in.');
-    } catch (error: any) {
-      setError(error.message);
+    } catch (err: unknown) {
+      // Handles errors thrown from the API response
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred.');
+      }
     } finally {
       setIsLoading(false);
     }
