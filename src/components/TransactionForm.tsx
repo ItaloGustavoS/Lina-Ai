@@ -105,14 +105,13 @@ const TransactionForm = ({ accounts, categories, transaction, onTransactionAdded
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="type">Type</Label>
-              <Select onValueChange={setType} value={type}>
+              <Select onValueChange={(value) => setType(value as 'ganho' | 'gasto')} value={type}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ganho">Ganho</SelectItem>
                   <SelectItem value="gasto">Gasto</SelectItem>
-                  <SelectItem value="investimento">Investimento</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     const text = response.text();
 
     return NextResponse.json({ analysis: text });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to analyze transactions' }, { status: 500 });
   }
 }

@@ -1,6 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import AccountForm from '../AccountForm';
-import { supabase } from '@/lib/supabase';
 
 jest.mock('@/lib/supabase', () => ({
   supabase: {

@@ -22,7 +22,7 @@ const analysisPrompts = [
 ];
 
 const DashboardPage = () => {
-  const { data: transactions, setTransactions } = useSupabase<Transaction>('transactions');
+  const { data: transactions, setData: setTransactions } = useSupabase<Transaction>('transactions');
   const { data: categories } = useSupabase<Category>('categories');
   const [upcomingBills, setUpcomingBills] = useState<Transaction[]>([]);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -35,12 +35,14 @@ const DashboardPage = () => {
     const fetchTransactions = async () => {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       if (user.id) {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('transactions')
           .select('*, category:categories(name)')
           .eq('user_id', user.id);
 
-        if (data) {
+        if (error) {
+          console.error('Error fetching transactions:', error);
+        } else if (data) {
           setTransactions(data);
 
           const today = new Date();
@@ -216,7 +218,7 @@ const DashboardPage = () => {
               {upcomingBills.map(bill => (
                 <li key={bill.id} className="flex justify-between items-center p-2 border-b">
                   <span>{bill.description}</span>
-                  <span>{new Date(bill.due_date).toLocaleDateString()}</span>
+                  <span>{bill.due_date && new Date(bill.due_date).toLocaleDateString()}</span>
                 </li>
               ))}
             </ul>

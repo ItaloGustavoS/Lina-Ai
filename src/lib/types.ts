@@ -14,7 +14,7 @@ export interface Category {
 
 export interface Transaction {
   id: string;
-  type: 'ganho' | 'gasto' | 'investimento';
+  type: 'ganho' | 'gasto';
   amount: number;
   description: string;
   date: string;
@@ -22,6 +22,7 @@ export interface Transaction {
   account_id: string;
   category_id: string;
   user_id: string;
+  category?: { name: string } | null;
 }
 
 export interface Goal {
