@@ -50,7 +50,7 @@ const RegisterPage = () => {
           },
           body: JSON.stringify({ name, email, password }),
         });
-      } catch {
+      } catch (error) {
         // Network errors
         setError('Network error: Please check your connection and try again.');
         setIsLoading(false);
