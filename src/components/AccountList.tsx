@@ -18,10 +18,12 @@ interface AccountListProps {
 
 const AccountList = ({ accounts, onAccountUpdated, onAccountDeleted }: AccountListProps) => {
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
+  const [updateError, setUpdateError] = useState<string | null>(null);
 
   const handleUpdateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingAccount) return;
+    setUpdateError(null);
     const { data, error } = await supabase
       .from('accounts')
       .update({ name: editingAccount.name, type: editingAccount.type })
@@ -29,6 +31,7 @@ const AccountList = ({ accounts, onAccountUpdated, onAccountDeleted }: AccountLi
       .select();
     if (error) {
       console.error('Error updating account:', error);
+      setUpdateError('Failed to update account. Please try again.');
     } else if (data) {
       onAccountUpdated(data[0]);
       setEditingAccount(null);
@@ -75,7 +78,7 @@ const AccountList = ({ accounts, onAccountUpdated, onAccountDeleted }: AccountLi
                 <span className="text-sm text-gray-500 ml-2">{account.type}</span>
               </div>
               <div className="flex gap-2">
-                <Dialog open={editingAccount?.id === account.id} onOpenChange={() => setEditingAccount(editingAccount?.id === account.id ? null : account)}>
+                <Dialog open={editingAccount?.id === account.id} onOpenChange={() => { setEditingAccount(editingAccount?.id === account.id ? null : account); setUpdateError(null); }}>
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm">Edit</Button>
                   </DialogTrigger>
@@ -83,6 +86,11 @@ const AccountList = ({ accounts, onAccountUpdated, onAccountDeleted }: AccountLi
                     <DialogHeader>
                       <DialogTitle>Edit Account</DialogTitle>
                     </DialogHeader>
+                    {updateError && (
+                      <div className="p-3 bg-red-500/20 text-red-400 rounded-md">
+                        {updateError}
+                      </div>
+                    )}
                     <form onSubmit={handleUpdateAccount}>
                       <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">

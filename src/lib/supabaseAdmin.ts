@@ -4,11 +4,11 @@ import { createClient } from '@supabase/supabase-js';
 // It uses the Supabase service role key and bypasses RLS.
 // Never expose this client or its key to the client-side.
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseUrl = process.env.SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_KEY;
 
 if (!supabaseUrl) {
-  throw new Error("Missing environment variable: NEXT_PUBLIC_SUPABASE_URL");
+  throw new Error("Missing environment variable: SUPABASE_URL");
 }
 
 if (!serviceKey) {

@@ -57,7 +57,15 @@ const RegisterPage = () => {
         return;
       }
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (error) {
+        // Handle non-JSON responses
+        setError('An unexpected response was received from the server.');
+        setIsLoading(false);
+        return;
+      }
 
       if (!response.ok) {
         // API errors
