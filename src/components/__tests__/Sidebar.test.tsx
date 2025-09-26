@@ -3,12 +3,6 @@ import Sidebar from '../Sidebar';
 import { navLinks } from '@/lib/navLinks';
 import { useSession } from '@/hooks/useSession';
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import Sidebar from '../Sidebar';
-import { navLinks } from '@/lib/navLinks';
-import { useSession } from '@/hooks/useSession';
-import { useRouter } from 'next/navigation';
-
 // Mock the next/navigation hooks
 const mockPush = jest.fn();
 jest.mock('next/navigation', () => ({

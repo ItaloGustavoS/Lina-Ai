@@ -1,4 +1,3 @@
-const from = jest.fn().mockReturnThis();
 const select = jest.fn().mockResolvedValue({ data: [], error: null });
 const insert = jest.fn().mockResolvedValue({ data: [], error: null });
 const update = jest.fn().mockReturnThis();

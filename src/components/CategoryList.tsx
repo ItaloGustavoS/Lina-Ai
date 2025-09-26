@@ -31,7 +31,9 @@ const CategoryList = ({ categories, onCategoryUpdated, onCategoryDeleted }: Cate
       .update({ name: editingCategory.name, monthly_limit: editingCategory.monthly_limit || null })
       .eq('id', editingCategory.id)
       .select();
-    if (data) {
+    if (error) {
+      console.error('Error updating category:', error);
+    } else if (data) {
       onCategoryUpdated(data[0]);
       setEditingCategory(null);
     }

@@ -27,7 +27,9 @@ const AccountList = ({ accounts, onAccountUpdated, onAccountDeleted }: AccountLi
       .update({ name: editingAccount.name, type: editingAccount.type })
       .eq('id', editingAccount.id)
       .select();
-    if (data) {
+    if (error) {
+      console.error('Error updating account:', error);
+    } else if (data) {
       onAccountUpdated(data[0]);
       setEditingAccount(null);
     }

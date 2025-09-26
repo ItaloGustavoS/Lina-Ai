@@ -125,7 +125,7 @@ const LoginPage = () => {
             </Button>
           </form>
           <div className="mt-4 text-center text-sm text-gray-400">
-            Don't have an account yet?{' '}
+            Don&apos;t have an account yet?{' '}
             <Link href="/register" className="font-medium text-indigo-400 hover:text-indigo-500">
               Sign up
             </Link>

@@ -65,9 +65,13 @@ const RegisterPage = () => {
       }
 
       router.push('/login?message=Registration successful! Please check your email to confirm your account and then log in.');
-    } catch (error: any) {
+    } catch (err: unknown) {
       // Handles errors thrown from the API response
-      setError(error.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred.');
+      }
     } finally {
       setIsLoading(false);
     }

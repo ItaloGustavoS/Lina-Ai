@@ -2,7 +2,6 @@ import * as React from "react"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
-type DivProps = React.ComponentProps<"div">
 type MotionDivProps = React.ComponentProps<typeof motion.div>
 
 function createCardSlot(
@@ -12,7 +11,8 @@ function createCardSlot(
 ) {
   const Component = React.forwardRef<HTMLDivElement, MotionDivProps>(
     ({ className, ...props }, ref) => {
-      const El = isMotion ? motion.div : 'div';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const El: any = isMotion ? motion.div : 'div';
       return (
         <El
           ref={ref}
