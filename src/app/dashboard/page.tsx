@@ -30,6 +30,7 @@ const DashboardPage = () => {
   const [analysis, setAnalysis] = useState('');
   const [selectedPrompt, setSelectedPrompt] = useState(analysisPrompts[0]);
   const [loadingAnalysis, setLoadingAnalysis] = useState(false);
+  const [transactionError, setTransactionError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -42,8 +43,10 @@ const DashboardPage = () => {
 
         if (error) {
           console.error('Error fetching transactions:', error);
+          setTransactionError('Failed to fetch transactions. Please try again later.');
         } else if (data) {
           setTransactions(data);
+          setTransactionError(null);
 
           const today = new Date();
           const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -110,6 +113,11 @@ const DashboardPage = () => {
 
   return (
     <div>
+      {transactionError && (
+        <div className="p-3 mb-4 bg-red-500/20 text-red-400 rounded-md">
+          {transactionError}
+        </div>
+      )}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Dashboard</h1>
         <div className="flex gap-2">
