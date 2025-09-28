@@ -34,9 +34,14 @@ async function insertUserProfile(userId: string, email: string, name: string) {
   return error;
 }
 
+// Trust proxy configuration (set via environment variable or config)
+const TRUST_PROXY = process.env.TRUST_PROXY === 'true';
+
 export async function POST(request: Request) {
   // 1. Rate Limiting
-  const ip = getClientIp(request);
+  // Only trust x-forwarded-for if TRUST_PROXY is enabled
+  // This is important for security in production environments
+  const ip = getClientIp(request, { trustProxy: TRUST_PROXY });
 
   if (isRateLimited(ip)) {
     return NextResponse.json(
