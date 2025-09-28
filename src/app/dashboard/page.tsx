@@ -12,6 +12,7 @@ import { ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSupabase } from '@/hooks/useSupabase';
 import { Transaction, Category } from '@/lib/types';
+import ErrorBanner from '@/components/ui/ErrorBanner';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -113,11 +114,7 @@ const DashboardPage = () => {
 
   return (
     <div>
-      {transactionError && (
-        <div className="p-3 mb-4 bg-red-500/20 text-red-400 rounded-md">
-          {transactionError}
-        </div>
-      )}
+      <ErrorBanner message={transactionError} />
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Dashboard</h1>
         <div className="flex gap-2">

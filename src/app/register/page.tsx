@@ -68,15 +68,22 @@ const RegisterPage = () => {
       }
 
       if (!response.ok) {
-        // API errors
-        throw new Error(data.error || 'An unexpected error occurred.');
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (jsonError) {
+          throw new Error(`The server returned an error (status ${response.status}), but the message could not be read.`);
+        }
+        throw new Error(errorData.error || 'An unexpected server error occurred.');
       }
 
       router.push('/login?message=Registration successful! Please check your email to confirm your account and then log in.');
-    } catch (err: unknown) {
-      // Handles errors thrown from the API response
-      if (err instanceof Error) {
-        setError(err.message);
+    } catch (error) {
+      if (error instanceof TypeError) {
+        // This typically indicates a network error
+        setError('Network error: Please check your connection and try again.');
+      } else if (error instanceof Error) {
+        setError(error.message);
       } else {
         setError('An unexpected error occurred.');
       }
