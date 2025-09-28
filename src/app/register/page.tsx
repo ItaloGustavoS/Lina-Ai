@@ -41,13 +41,31 @@ const RegisterPage = () => {
     }
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password }),
-      });
+      let response;
+      try {
+        response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name, email, password }),
+        });
+      } catch (error) {
+        // Network errors
+        setError('Network error: Please check your connection and try again.');
+        setIsLoading(false);
+        return;
+      }
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (error) {
+        // Handle non-JSON responses
+        setError('An unexpected response was received from the server.');
+        setIsLoading(false);
+        return;
+      }
 
       if (!response.ok) {
         let errorData;
