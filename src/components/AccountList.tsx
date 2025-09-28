@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Account } from '@/lib/types';
 import { motion } from 'framer-motion';
+import ErrorBanner from './ui/ErrorBanner';
 
 interface AccountListProps {
   accounts: Account[];
@@ -86,11 +87,7 @@ const AccountList = ({ accounts, onAccountUpdated, onAccountDeleted }: AccountLi
                     <DialogHeader>
                       <DialogTitle>Edit Account</DialogTitle>
                     </DialogHeader>
-                    {updateError && (
-                      <div className="p-3 bg-red-500/20 text-red-400 rounded-md">
-                        {updateError}
-                      </div>
-                    )}
+                    <ErrorBanner message={updateError} />
                     <form onSubmit={handleUpdateAccount}>
                       <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { getClientIp } from '@/lib/utils';
 import { registrationSchema } from './validation';
 
 // Simple in-memory rate limiter (for demonstration purposes)
@@ -35,22 +36,6 @@ async function insertUserProfile(userId: string, email: string, name: string) {
 
 export async function POST(request: Request) {
   // 1. Rate Limiting
-  function getClientIp(request: Request): string {
-    const xForwardedFor = request.headers.get('x-forwarded-for');
-    if (xForwardedFor) {
-      // x-forwarded-for may contain multiple IPs, take the first one
-      const ip = xForwardedFor.split(',')[0].trim();
-      // Simple IPv4/IPv6 validation
-      const ipv4Regex = /^(?:\d{1,3}\.){3}\d{1,3}$/;
-      const ipv6Regex = /^[a-fA-F0-9:]+$/;
-      if (ipv4Regex.test(ip) || ipv6Regex.test(ip)) {
-        return ip;
-      }
-    }
-    // Fallback to localhost if no valid IP found
-    return '127.0.0.1';
-  }
-
   const ip = getClientIp(request);
 
   if (isRateLimited(ip)) {
